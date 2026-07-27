@@ -49,18 +49,37 @@ export function AuthScreen({ onClose }) {
         if (onClose) onClose();
         Alert.alert("Welcome Back!", "Successfully authenticated via Clerk.");
       } else if (completeSignIn.status === "needs_first_factor" || completeSignIn.status === "needs_second_factor") {
-        await signIn.prepareFirstFactor({ strategy: "email_code" });
-        setLoading(false);
-        setSignUpEmail(signInEmail.trim());
-        setPendingVerification(true);
-        Alert.alert("One-Time Code Sent", `A verification code was sent to ${signInEmail.trim()}.`);
+        const emailFactor = completeSignIn.supportedFirstFactors?.find(f => f.strategy === "email_code");
+        if (emailFactor && emailFactor.emailAddressId) {
+          await signIn.prepareFirstFactor({
+            strategy: "email_code",
+            emailAddressId: emailFactor.emailAddressId
+          });
+          setLoading(false);
+          setSignUpEmail(signInEmail.trim());
+          setPendingVerification(true);
+          Alert.alert("One-Time Code Sent", `A verification code was sent to ${signInEmail.trim()}.`);
+        } else {
+          setLoading(false);
+          Alert.alert("Verification Required", "Please complete verification or sign up.");
+        }
       } else {
         setLoading(false);
         Alert.alert("Sign In Status", `Status: ${completeSignIn.status}`);
       }
     } catch (err) {
       setLoading(false);
-      Alert.alert("Clerk Authentication Failed", formatClerkError(err));
+      const errMsg = formatClerkError(err);
+      if (err.errors?.[0]?.code === "form_identifier_not_found" || errMsg.toLowerCase().includes("not found")) {
+        setSignUpEmail(signInEmail.trim());
+        setMode("signup");
+        Alert.alert(
+          "Activation Needed 🔑",
+          `Account for ${signInEmail.trim()} is not yet registered in Clerk.\n\nYour Admin has pre-authorized your Student ID! We have switched you to 'New Account Sign Up'. Please enter your Student ID to activate your account.`
+        );
+      } else {
+        Alert.alert("Clerk Authentication Failed", errMsg);
+      }
     }
   };
 
