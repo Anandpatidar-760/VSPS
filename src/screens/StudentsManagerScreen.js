@@ -17,6 +17,7 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
   const [searchQuery, setSearchQuery] = useState("");
 
   // Form states (Add & Edit)
+  const [fStudentId, setFStudentId] = useState("");
   const [fName, setFName] = useState("");
   const [fEmail, setFEmail] = useState("");
   const [fPhone, setFPhone] = useState("");
@@ -26,6 +27,8 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
   const [fPassword, setFPassword] = useState("password123");
 
   const openAdd = () => {
+    const defaultId = `VSPS-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    setFStudentId(defaultId);
     setFName("");
     setFEmail("");
     setFPhone("");
@@ -37,10 +40,13 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
   };
 
   const submitAdd = async () => {
+    if (!fStudentId.trim()) { Alert.alert("Required", "Official Student ID is required."); return; }
     if (!fName.trim()) { Alert.alert("Required", "Full name is required."); return; }
     if (!fEmail.trim() || !fEmail.includes("@")) { Alert.alert("Required", "Valid email address is required."); return; }
     try {
       await saveStudentToDB({
+        id: fStudentId.trim(),
+        onboardingCode: fStudentId.trim(),
         name: fName.trim(),
         email: fEmail.trim(),
         phone: fPhone.trim(),
@@ -51,7 +57,7 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
       });
       setShowAddModal(false);
       if (onRefresh) await onRefresh();
-      Alert.alert("Success 🎉", `Registered ${fName.trim()} in Supabase Cloud & Local DB.`);
+      Alert.alert("Student Issued ✅", `Registered Student ID "${fStudentId.trim()}" for ${fName.trim()} in Supabase Cloud.`);
     } catch (err) {
       Alert.alert("Create Error", err.message || "Failed to create student.");
     }
@@ -59,6 +65,7 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
 
   const openEdit = (student) => {
     setEditTarget(student);
+    setFStudentId(student.id || student.onboardingCode || "");
     setFName(student.name || "");
     setFEmail(student.email || "");
     setFPhone(student.phone || "");
@@ -70,10 +77,13 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
   };
 
   const submitEdit = async () => {
+    if (!fStudentId.trim()) { Alert.alert("Required", "Student ID cannot be empty."); return; }
     if (!fName.trim()) { Alert.alert("Required", "Name cannot be empty."); return; }
     if (!fEmail.trim() || !fEmail.includes("@")) { Alert.alert("Required", "Enter a valid email."); return; }
     await onUpdate({
       ...editTarget,
+      id: fStudentId.trim(),
+      onboardingCode: fStudentId.trim(),
       name: fName.trim(),
       email: fEmail.trim(),
       phone: fPhone.trim(),
@@ -88,6 +98,7 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
   const filteredStudents = students.filter(s =>
     s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.role?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -123,7 +134,7 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
       <View style={{ marginTop: 14, marginBottom: 6 }}>
         <TextInput
           style={styles.input}
-          placeholder="Search member by name, email or role..."
+          placeholder="Search member by Student ID, name, or email..."
           placeholderTextColor="#94A3B8"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -133,7 +144,7 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
       {/* CRUD Legend */}
       <View style={styles.crudLegend}>
         {[
-          ["C", "Create (Add Member)", colors.green],
+          ["C", "Create (Issue ID)", colors.green],
           ["R", "Read (Synced list)", colors.blue],
           ["U", "Update (Edit)", colors.amber],
           ["D", "Delete (Remove)", colors.red]
@@ -152,7 +163,7 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
         <View style={styles.emptyState}>
           <MaterialCommunityIcons name="account-off-outline" size={48} color={colors.line} />
           <Text style={styles.emptyStateText}>No members found.</Text>
-          <Text style={styles.emptyStateSubText}>Tap "+ Add New Member" above to create one in Supabase.</Text>
+          <Text style={styles.emptyStateSubText}>Tap "+ Add New Member" above to issue a Student ID in Supabase.</Text>
         </View>
       ) : (
         filteredStudents.map((student) => (
@@ -163,7 +174,12 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
               </Text>
             </View>
             <View style={styles.flex}>
-              <Text style={styles.cardTitle}>{student.name}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Text style={styles.cardTitle}>{student.name}</Text>
+                <View style={{ backgroundColor: "#EEF2FF", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderColor: "#C7D2FE", borderWidth: 1 }}>
+                  <Text style={{ fontSize: 10, fontWeight: "900", color: colors.blue }}>{student.id}</Text>
+                </View>
+              </View>
               <Text style={styles.crudRowMeta}>{student.classSection} · Roll {student.rollNo}</Text>
               <Text style={styles.idMetaSub}>{student.email}</Text>
               <View style={styles.rolePillRow}>
@@ -189,12 +205,22 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
         <SafeAreaView style={styles.authSafe}>
           <ScrollView contentContainerStyle={styles.authScroll}>
             <View style={styles.editModalHeader}>
-              <MaterialCommunityIcons name="account-plus-outline" size={36} color={colors.teal} />
-              <Text style={styles.editModalTitle}>Add New Member</Text>
+              <MaterialCommunityIcons name="card-account-details-outline" size={36} color={colors.teal} />
+              <Text style={styles.editModalTitle}>Issue Student ID & Member</Text>
               <Text style={styles.editModalSub}>Creates record in Supabase PostgreSQL Cloud</Text>
             </View>
 
             <View style={styles.formContainer}>
+              <Text style={styles.inputLabel}>Official Student ID / Member ID *</Text>
+              <TextInput
+                style={[styles.input, { fontWeight: "800", color: colors.blue, backgroundColor: "#F8FAFC" }]}
+                value={fStudentId}
+                onChangeText={setFStudentId}
+                autoCapitalize="characters"
+                placeholder="e.g. VSPS-2026-0815"
+                placeholderTextColor="#94A3B8"
+              />
+
               <Text style={styles.inputLabel}>Full Name *</Text>
               <TextInput style={styles.input} value={fName} onChangeText={setFName} placeholderTextColor="#94A3B8" placeholder="e.g. Priyesh Sharma" />
 
@@ -229,7 +255,7 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
 
               <Pressable onPress={submitAdd} style={styles.primaryAuthBtn}>
                 <MaterialCommunityIcons name="cloud-upload-outline" size={20} color="#FFFFFF" />
-                <Text style={styles.primaryAuthBtnText}>Create Member in Supabase</Text>
+                <Text style={styles.primaryAuthBtnText}>Issue Student ID in Supabase</Text>
               </Pressable>
 
               <Pressable onPress={() => setShowAddModal(false)} style={styles.closeAuthBtn}>
@@ -246,11 +272,21 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
           <ScrollView contentContainerStyle={styles.authScroll}>
             <View style={styles.editModalHeader}>
               <MaterialCommunityIcons name="account-edit-outline" size={36} color={colors.blue} />
-              <Text style={styles.editModalTitle}>Edit Member</Text>
+              <Text style={styles.editModalTitle}>Edit Member & ID</Text>
               <Text style={styles.editModalSub}>ID: {editTarget?.id}</Text>
             </View>
 
             <View style={styles.formContainer}>
+              <Text style={styles.inputLabel}>Official Student ID / Member ID *</Text>
+              <TextInput
+                style={[styles.input, { fontWeight: "800", color: colors.blue }]}
+                value={fStudentId}
+                onChangeText={setFStudentId}
+                autoCapitalize="characters"
+                placeholder="e.g. VSPS-2026-0815"
+                placeholderTextColor="#94A3B8"
+              />
+
               <Text style={styles.inputLabel}>Full Name *</Text>
               <TextInput style={styles.input} value={fName} onChangeText={setFName} placeholderTextColor="#94A3B8" placeholder="Student name" />
 
