@@ -78,19 +78,6 @@ export function FeesScreen({ role }) {
     <View>
       <SectionTitle title="Fee Management" />
 
-      {/* Cloud Sync Banner */}
-      <View style={styles.dbBanner}>
-        <MaterialCommunityIcons name="cloud-sync-outline" size={24} color={colors.teal} />
-        <View style={styles.flex}>
-          <Text style={styles.dbBannerText}>Supabase Cloud Fees Database</Text>
-          <Text style={{ fontSize: 11, color: colors.muted }}>Real-time payment dues and receipt status</Text>
-        </View>
-        <Pressable onPress={refreshFees} style={styles.refreshBtn}>
-          <MaterialCommunityIcons name="refresh" size={16} color={colors.blue} />
-          <Text style={styles.refreshBtnText}>Sync</Text>
-        </Pressable>
-      </View>
-
       {/* Admin Action Button */}
       {isAdmin && (
         <PrimaryButton

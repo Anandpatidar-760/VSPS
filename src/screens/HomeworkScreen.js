@@ -59,19 +59,6 @@ export function HomeworkScreen({ role }) {
     <View>
       <SectionTitle title={isTeacherOrAdmin ? "Teacher Homework Portal" : "Homework Assignments"} />
 
-      {/* Cloud Sync Banner */}
-      <View style={styles.dbBanner}>
-        <MaterialCommunityIcons name="book-open-page-variant" size={22} color={colors.teal} />
-        <View style={styles.flex}>
-          <Text style={styles.dbBannerText}>Supabase Homework Assignments</Text>
-          <Text style={{ fontSize: 11, color: colors.muted }}>Class VIII A Digital Workspace</Text>
-        </View>
-        <Pressable onPress={refreshHomework} style={styles.refreshBtn}>
-          <MaterialCommunityIcons name="refresh" size={16} color={colors.blue} />
-          <Text style={styles.refreshBtnText}>Sync</Text>
-        </Pressable>
-      </View>
-
       {/* Teacher Add Homework Form */}
       {isTeacherOrAdmin && (
         <View style={styles.inputCard}>

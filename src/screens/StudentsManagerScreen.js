@@ -106,23 +106,6 @@ export function StudentsManagerScreen({ students = [], onUpdate, onDelete, onRef
     <View>
       <SectionTitle title="Student Management" />
 
-      {/* Supabase Cloud Live Banner */}
-      <View style={styles.dbBanner}>
-        <MaterialCommunityIcons name="cloud-check-outline" size={24} color={colors.teal} />
-        <View style={styles.flex}>
-          <Text style={styles.dbBannerText}>
-            Supabase Cloud Connected · {students.length} Total Records
-          </Text>
-          <Text style={{ fontSize: 11, color: colors.muted, marginTop: 1 }}>
-            PostgreSQL DB synced with Local SQLite Cache
-          </Text>
-        </View>
-        <Pressable onPress={onRefresh} style={styles.refreshBtn}>
-          <MaterialCommunityIcons name="refresh" size={16} color={colors.blue} />
-          <Text style={styles.refreshBtnText}>Sync</Text>
-        </Pressable>
-      </View>
-
       {/* Add New Student Action */}
       <PrimaryButton
         icon="account-plus-outline"

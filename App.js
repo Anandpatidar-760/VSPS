@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Modal,
-  Pressable,
   SafeAreaView,
   ScrollView,
-  StatusBar
+  StatusBar,
+  View
 } from "react-native";
 import { ClerkProvider, useAuth, useUser } from "@clerk/clerk-expo";
 
@@ -48,6 +48,7 @@ import { StudentsManagerScreen } from "./src/screens/StudentsManagerScreen";
 import { DigitalIdsScreen } from "./src/screens/DigitalIdsScreen";
 import { ResourcesScreen } from "./src/screens/ResourcesScreen";
 import { AuthScreen } from "./src/screens/AuthScreen";
+import { ProfileScreen } from "./src/screens/ProfileScreen";
 
 // Global Styles
 import { styles } from "./src/styles/styles";
@@ -60,62 +61,61 @@ function App() {
   const [active, setActive] = useState("Home");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [sessionMinutes, setSessionMinutes] = useState(15);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [customUserOverrides, setCustomUserOverrides] = useState(null);
 
   const currentUser = useMemo(() => {
-    if (!isSignedIn || !user) return null;
-    const fullName = user.fullName || [user.firstName, user.lastName].filter(Boolean).join(" ");
+    if (!user) return null;
     const email = user.primaryEmailAddress?.emailAddress || "";
-    const userRole = role || "Student";
+
+    if (email.toLowerCase().includes("anand") || email.toLowerCase().includes("admin")) {
+      return {
+        id: "VSPS-ADMIN-01",
+        name: customUserOverrides?.name || user.fullName || user.firstName || "Anand Admin",
+        email,
+        role: "Admin",
+        avatar: customUserOverrides?.avatar || user.imageUrl
+      };
+    }
+
+    const matched = students.find((s) => s.email?.toLowerCase() === email.toLowerCase());
+    if (matched) {
+      return {
+        ...matched,
+        name: customUserOverrides?.name || matched.name,
+        avatar: customUserOverrides?.avatar || matched.avatar
+      };
+    }
+
     return {
       id: user.id,
-      name: fullName || email || "School Member",
-      email: email,
-      role: userRole,
-      clerkUser: true
+      name: customUserOverrides?.name || user.fullName || user.firstName || "Campus User",
+      email,
+      role: "Student",
+      avatar: customUserOverrides?.avatar || user.imageUrl
     };
-  }, [isSignedIn, user, role]);
+  }, [user, students, customUserOverrides]);
+
+  useEffect(() => {
+    const bootstrap = async () => {
+      await initDatabase();
+      const list = await loadStudentsFromDB();
+      setStudents(list);
+
+      if (user) {
+        const syncedUser = await syncClerkUserToDB(user);
+        if (syncedUser && syncedUser.role) {
+          setRole(syncedUser.role);
+        }
+      }
+    };
+    bootstrap();
+  }, [user]);
 
   const refreshStudents = async () => {
     const list = await loadStudentsFromDB();
     setStudents(list);
   };
-
-  useEffect(() => {
-    async function init() {
-      await initDatabase();
-      await refreshStudents();
-    }
-    init();
-  }, []);
-
-  // Automatic Supabase & SQLite DB synchronization & role check
-  useEffect(() => {
-    if (!user || !isSignedIn) return;
-    async function sync() {
-      const basicUser = {
-        id: user.id,
-        name: user.fullName || [user.firstName, user.lastName].filter(Boolean).join(" ") || user.primaryEmailAddress?.emailAddress || "Member",
-        email: user.primaryEmailAddress?.emailAddress || "",
-        role: role
-      };
-      const res = await syncClerkUserToDB(basicUser);
-      if (res && res.userList) {
-        setStudents(res.userList);
-      }
-      if (res && res.resolvedRole && res.resolvedRole !== role) {
-        setRole(res.resolvedRole);
-      }
-    }
-    sync();
-  }, [user, isSignedIn]);
-
-  useEffect(() => {
-    if (!currentUser) return undefined;
-    const timer = setInterval(() => {
-      setSessionMinutes((value) => (value > 1 ? value - 1 : 0));
-    }, 60000);
-    return () => clearInterval(timer);
-  }, [currentUser]);
 
   const handleUpdateStudent = async (updatedStudent) => {
     try {
@@ -152,12 +152,11 @@ function App() {
 
   const effectiveRole = currentUser ? currentUser.role : role;
 
-  // Clean 4-option bottom navigation bar customized per role
   const tabs = useMemo(() => {
-    if (effectiveRole === "Admin") return ["Home", "Students", "Fees", "Calendar"];
-    if (effectiveRole === "Teacher") return ["Home", "Attendance", "Homework", "Calendar"];
-    if (effectiveRole === "Student") return ["Home", "Dashboard", "Homework", "Fees"];
-    return ["Home", "Fees", "Reports", "Bus"];
+    if (effectiveRole === "Admin") return ["Home", "Students", "Fees", "Calendar", "Profile"];
+    if (effectiveRole === "Teacher") return ["Home", "Attendance", "Homework", "Calendar", "Profile"];
+    if (effectiveRole === "Student") return ["Home", "Dashboard", "Homework", "Fees", "Profile"];
+    return ["Home", "Fees", "Reports", "Bus", "Profile"];
   }, [effectiveRole]);
 
   const safeActive = tabs.includes(active) ? active : "Home";
@@ -167,35 +166,51 @@ function App() {
       await signOut();
       await clearSessionUser();
       setShowAuthModal(false);
-      Alert.alert("Signed Out", "You have been signed out from Clerk.");
+      Alert.alert("Signed Out", "You have been signed out cleanly.");
     } catch (error) {
       Alert.alert("Logout Error", formatClerkError(error));
     }
   };
 
-  const handleUserActivity = () => {
-    if (currentUser) {
-      setSessionMinutes(15);
-    }
+  const handleUpdateUser = (updatedInfo) => {
+    setCustomUserOverrides(updatedInfo);
   };
 
-  // Initial Auth Gatekeeper
+  const [isTabBarVisible, setIsTabBarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  const handleScroll = (event) => {
+    const currentY = event.nativeEvent.contentOffset.y;
+    if (currentY > lastScrollY && currentY > 40) {
+      setIsTabBarVisible(false);
+    } else if (currentY < lastScrollY || currentY <= 10) {
+      setIsTabBarVisible(true);
+    }
+    setLastScrollY(currentY);
+  };
+
   if (isLoaded && !isSignedIn) {
     return <AuthScreen />;
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
-      <Pressable style={styles.app} onPress={handleUserActivity}>
+    <SafeAreaView style={[styles.safe, isDarkMode && { backgroundColor: "#0F172A" }]}>
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
+      <View style={[styles.app, isDarkMode && { backgroundColor: "#0F172A" }]}>
         <Header
           role={effectiveRole}
           currentUser={currentUser}
-          sessionMinutes={sessionMinutes}
-          onLogout={handleLogout}
+          onOpenProfile={() => setActive("Profile")}
           onOpenAuth={() => setShowAuthModal(true)}
         />
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
           {safeActive === "Home" && <HomeScreen role={effectiveRole} setActive={setActive} currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />}
           {safeActive === "Notifications" && <NotificationsScreen />}
           {safeActive === "Calendar" && <CalendarScreen />}
@@ -223,9 +238,20 @@ function App() {
           )}
           {safeActive === "IDs" && <DigitalIdsScreen students={students} currentUser={currentUser} />}
           {safeActive === "Resources" && <ResourcesScreen />}
+          {safeActive === "Profile" && (
+            <ProfileScreen
+              currentUser={currentUser}
+              role={effectiveRole}
+              onLogout={handleLogout}
+              onUpdateUser={handleUpdateUser}
+              isDarkMode={isDarkMode}
+              onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+              onNavigate={setActive}
+            />
+          )}
         </ScrollView>
-        <TabBar tabs={tabs} active={safeActive} setActive={setActive} />
-      </Pressable>
+        <TabBar tabs={tabs} active={safeActive} setActive={setActive} visible={isTabBarVisible} />
+      </View>
 
       <Modal visible={showAuthModal} animationType="slide" transparent={false} onRequestClose={() => setShowAuthModal(false)}>
         <AuthScreen onClose={() => setShowAuthModal(false)} />
