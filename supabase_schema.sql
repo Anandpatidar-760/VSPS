@@ -111,9 +111,7 @@ INSERT INTO public.students (id, name, email, phone, class_section, roll_no, pas
 VALUES
   ('VSPS-2026-0808', 'Aarav Patel', 'aarav@vsps.edu', '+91 98765 43210', 'Class VIII A', '08', 'password123', 'Student', 'VSPS-ONBOARD-2026'),
   ('VSPS-2026-0809', 'Meera Patel', 'meera.p@vsps.edu', '+91 98765 11111', 'Class VIII A', '14', 'password123', 'Student', 'VSPS-ONBOARD-2026'),
-  ('VSPS-2026-0810', 'Rohan Singh', 'rohan@vsps.edu', '+91 98765 22222', 'Class VIII A', '22', 'password123', 'Student', 'VSPS-ONBOARD-2026'),
-  ('VSPS-2026-0811', 'Pre-enrolled Student 1', 'unclaimed1@vsps.edu', '+91 98765 33333', 'Class VIII A', '11', 'password123', 'Student', 'VSPS-2026-0811'),
-  ('VSPS-2026-0812', 'Pre-enrolled Student 2', 'unclaimed2@vsps.edu', '+91 98765 44444', 'Class VIII A', '12', 'password123', 'Student', 'VSPS-2026-0812')
+  ('VSPS-2026-0810', 'Rohan Singh', 'rohan@vsps.edu', '+91 98765 22222', 'Class VIII A', '22', 'password123', 'Student', 'VSPS-ONBOARD-2026')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.teachers (name, email, phone, subject, department)

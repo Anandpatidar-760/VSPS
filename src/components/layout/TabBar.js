@@ -1,13 +1,13 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Platform } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { colors } from "../../constants/theme";
 import { styles } from "../../styles/styles";
 
-export function TabBar({ tabs, active, setActive }) {
+export function TabBar({ tabs, active, setActive, visible = true }) {
   const getTabIcon = (name) => {
     switch (name) {
-      case "Home": return "home-outline";
+      case "Home": return "home-variant-outline";
       case "Students": return "account-group-outline";
       case "Fees": return "card-account-details-outline";
       case "Calendar": return "calendar-month-outline";
@@ -17,42 +17,64 @@ export function TabBar({ tabs, active, setActive }) {
       case "Reports": return "chart-box-outline";
       case "Bus": return "bus-clock";
       case "Security": return "shield-lock-outline";
+      case "Profile": return "account-circle-outline";
       default: return "grid-large";
     }
   };
 
+  const getActiveTabIcon = (name) => {
+    switch (name) {
+      case "Home": return "home-variant";
+      case "Students": return "account-group";
+      case "Fees": return "card-account-details";
+      case "Calendar": return "calendar-month";
+      case "Attendance": return "clipboard-check";
+      case "Homework": return "book-open-page-variant";
+      case "Dashboard": return "view-dashboard";
+      case "Reports": return "chart-box";
+      case "Bus": return "bus";
+      case "Security": return "shield-lock";
+      case "Profile": return "account-circle";
+      default: return "grid-large";
+    }
+  };
+
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <View style={styles.tabShell}>
-      <View style={{ flexDirection: "row", justifyContent: "space-around", alignItems: "center" }}>
+    <View style={styles.fbTabShell}>
+      <View style={styles.fbTabInner}>
         {tabs.map((tab) => {
           const isActive = active === tab;
-          const iconName = getTabIcon(tab);
+          const iconName = isActive ? getActiveTabIcon(tab) : getTabIcon(tab);
+
           return (
             <Pressable
               key={tab}
               onPress={() => setActive(tab)}
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 6,
-                borderRadius: 10,
-                backgroundColor: isActive ? "#EEF2FF" : "transparent"
-              }}
+              style={styles.fbTabItem}
             >
-              <MaterialCommunityIcons
-                name={iconName}
-                size={22}
-                color={isActive ? colors.blue : colors.muted}
-              />
-              <Text style={{
-                fontSize: 11,
-                fontWeight: isActive ? "800" : "600",
-                color: isActive ? colors.blue : colors.muted,
-                marginTop: 2
-              }}>
+              <View style={[styles.fbIconContainer, isActive && styles.fbIconContainerActive]}>
+                <MaterialCommunityIcons
+                  name={iconName}
+                  size={24}
+                  color={isActive ? colors.blue : colors.muted}
+                />
+              </View>
+
+              <Text
+                style={[
+                  styles.fbTabText,
+                  isActive && styles.fbTabTextActive
+                ]}
+                numberOfLines={1}
+              >
                 {tab}
               </Text>
+              
+              {isActive && <View style={styles.fbActiveBarLine} />}
             </Pressable>
           );
         })}

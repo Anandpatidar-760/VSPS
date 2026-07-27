@@ -12,67 +12,45 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.bg
   },
   header: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     paddingTop: 14,
-    paddingBottom: 12,
+    paddingBottom: 14,
     backgroundColor: colors.surface,
     borderBottomColor: colors.line,
     borderBottomWidth: 1,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6
   },
   brandRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12
+    gap: 14
   },
   logoImage: {
     width: 48,
     height: 48,
     borderRadius: 24,
     backgroundColor: colors.ink,
-    overflow: "hidden"
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "#EEF2FF"
   },
   brandText: {
     flex: 1
   },
   schoolName: {
     color: colors.ink,
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: "900",
     letterSpacing: -0.3
   },
   schoolMeta: {
     color: colors.muted,
-    fontSize: 13,
-    marginTop: 2,
-    fontWeight: "500"
-  },
-  sessionStrip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 10,
-    backgroundColor: "#CCFBF1",
-    borderColor: "#99F6E4",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12
-  },
-  sessionText: {
-    flex: 1,
-    color: colors.teal,
     fontSize: 12,
-    fontWeight: "700"
-  },
-  sessionLink: {
-    color: colors.blue,
-    fontSize: 12,
-    fontWeight: "800"
+    fontWeight: "600"
   },
   roleRow: {
     gap: 8,
@@ -104,17 +82,17 @@ export const styles = StyleSheet.create({
   },
   hero: {
     backgroundColor: "#EEF2FF",
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 20,
     flexDirection: "row",
     alignItems: "center",
     borderColor: "#C7D2FE",
     borderWidth: 1,
-    elevation: 2,
+    elevation: 3,
     shadowColor: colors.blue,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
-    shadowRadius: 6
+    shadowRadius: 8
   },
   heroText: {
     flex: 1,
@@ -130,7 +108,7 @@ export const styles = StyleSheet.create({
   heroTitle: {
     color: colors.ink,
     fontWeight: "900",
-    fontSize: 28,
+    fontSize: 26,
     marginTop: 4,
     letterSpacing: -0.5
   },
@@ -159,7 +137,7 @@ export const styles = StyleSheet.create({
     color: colors.ink,
     fontSize: 20,
     fontWeight: "900",
-    marginTop: 24,
+    marginTop: 22,
     marginBottom: 14,
     letterSpacing: -0.4
   },
@@ -170,18 +148,18 @@ export const styles = StyleSheet.create({
   },
   actionCard: {
     width: "48%",
-    minHeight: 96,
+    minHeight: 100,
     backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     borderColor: colors.line,
     borderWidth: 1,
     justifyContent: "space-between",
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
-    shadowRadius: 4
+    shadowRadius: 6
   },
   actionText: {
     color: colors.ink,
@@ -192,8 +170,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: 16,
+    padding: 18,
     marginTop: 14,
     gap: 14
   },
@@ -210,7 +188,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: 16,
     borderColor: colors.line,
     borderWidth: 1,
     overflow: "hidden",
@@ -250,7 +228,7 @@ export const styles = StyleSheet.create({
   },
   datePill: {
     width: 68,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: colors.ink,
     alignItems: "center",
     justifyContent: "center",
@@ -267,14 +245,14 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14
   },
   newsCard: {
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12
   },
@@ -290,7 +268,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 14,
     marginBottom: 10
   },
@@ -321,7 +299,7 @@ export const styles = StyleSheet.create({
   },
   primaryButton: {
     minHeight: 50,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: colors.blue,
     alignItems: "center",
     justifyContent: "center",
@@ -329,11 +307,11 @@ export const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 18,
     marginTop: 14,
-    elevation: 2,
+    elevation: 3,
     shadowColor: colors.blue,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6
   },
   primaryButtonText: {
     color: "#FFFFFF",
@@ -344,7 +322,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12
   },
@@ -357,7 +335,7 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     borderWidth: 1,
     borderColor: colors.line,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 14,
     color: colors.ink,
@@ -376,7 +354,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12
   },
@@ -405,8 +383,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 14
+    borderRadius: 16,
+    padding: 16
   },
   metricValue: {
     fontSize: 22,
@@ -453,7 +431,7 @@ export const styles = StyleSheet.create({
   },
   methodChip: {
     flex: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     borderColor: colors.line,
     borderWidth: 1,
     backgroundColor: colors.surface,
@@ -470,7 +448,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16
   },
   progressRow: {
@@ -497,14 +475,14 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     gap: 12
   },
   bubble: {
     alignSelf: "flex-start",
     backgroundColor: "#F1F5F9",
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
     maxWidth: "84%"
   },
@@ -527,14 +505,14 @@ export const styles = StyleSheet.create({
   sendButton: {
     width: 48,
     height: 48,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: colors.blue,
     alignItems: "center",
     justifyContent: "center"
   },
   mapMock: {
     height: 260,
-    borderRadius: 14,
+    borderRadius: 16,
     backgroundColor: "#CCFBF1",
     borderColor: "#99F6E4",
     borderWidth: 1,
@@ -588,22 +566,22 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16,
     flexDirection: "row",
     gap: 14,
     alignItems: "center",
     marginBottom: 12,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
-    shadowRadius: 4
+    shadowRadius: 6
   },
   avatar: {
     width: 56,
     height: 56,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: colors.blue,
     alignItems: "center",
     justifyContent: "center"
@@ -632,7 +610,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12
   },
@@ -647,49 +625,117 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16,
     gap: 8
   },
-  tabShell: {
+
+  /* Floating Liquid Glass Bottom Navigation Bar */
+  floatingTabShell: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    bottom: Platform.OS === "ios" ? 20 : 12,
+    borderRadius: 24,
+    backgroundColor: Platform.OS === "ios" ? "rgba(255, 255, 255, 0.94)" : "#FFFFFF",
+    borderColor: "rgba(226, 232, 240, 0.9)",
+    borderWidth: 1,
+    elevation: 12,
+    shadowColor: "#4F46E5",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16
+  },
+  floatingTabInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    paddingVertical: 6,
+    paddingHorizontal: 6
+  },
+  floatingTabItem: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 9,
+    borderRadius: 18,
+    marginHorizontal: 3
+  },
+  floatingTabItemActive: {
+    backgroundColor: colors.blue,
+    elevation: 3,
+    shadowColor: colors.blue,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4
+  },
+  floatingTabText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.muted
+  },
+  floatingTabTextActive: {
+    color: "#FFFFFF",
+    fontWeight: "800"
+  },
+
+  /* Facebook / LinkedIn Native Style Bottom Bar */
+  fbTabShell: {
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: colors.surface,
+    backgroundColor: Platform.OS === "ios" ? "rgba(255, 255, 255, 0.96)" : "#FFFFFF",
     borderTopColor: colors.line,
     borderTopWidth: 1,
-    paddingBottom: Platform.OS === "ios" ? 24 : 12,
-    paddingTop: 12,
-    elevation: 8,
+    paddingBottom: Platform.OS === "ios" ? 18 : 6,
+    paddingTop: 6,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8
   },
-  tabRow: {
-    gap: 8,
-    paddingHorizontal: 14
+  fbTabInner: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center"
   },
-  tabItem: {
-    minHeight: 44,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    backgroundColor: "#F1F5F9",
+  fbTabItem: {
+    flex: 1,
+    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    paddingVertical: 4,
+    position: "relative"
   },
-  tabItemActive: {
-    backgroundColor: colors.blue
+  fbIconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 26
   },
-  tabText: {
+  fbIconContainerActive: {},
+  fbTabText: {
+    fontSize: 11,
+    fontWeight: "600",
     color: colors.muted,
-    fontWeight: "800",
-    fontSize: 13
+    marginTop: 2
   },
-  tabTextActive: {
-    color: "#FFFFFF"
+  fbTabTextActive: {
+    color: colors.blue,
+    fontWeight: "800"
   },
+  fbActiveBarLine: {
+    position: "absolute",
+    top: -6,
+    width: 24,
+    height: 3,
+    backgroundColor: colors.blue,
+    borderRadius: 2
+  },
+
   logoutBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -697,7 +743,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFE4E6",
     paddingVertical: 7,
     paddingHorizontal: 12,
-    borderRadius: 8
+    borderRadius: 10
   },
   logoutBtnText: {
     color: colors.red,
@@ -711,7 +757,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.blue,
     paddingVertical: 7,
     paddingHorizontal: 12,
-    borderRadius: 8
+    borderRadius: 10
   },
   loginBtnHeaderText: {
     color: "#FFFFFF",
@@ -774,15 +820,15 @@ export const styles = StyleSheet.create({
   },
   formContainer: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 20,
+    padding: 22,
     borderColor: colors.line,
     borderWidth: 1,
     elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.06,
-    shadowRadius: 8
+    shadowRadius: 10
   },
   jsonNoticeBox: {
     flexDirection: "row",
@@ -791,7 +837,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#EEF2FF",
     borderColor: "#C7D2FE",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 12,
     marginBottom: 16
   },
@@ -818,7 +864,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     backgroundColor: colors.blue,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingVertical: 14,
     marginTop: 22
   },
@@ -836,7 +882,7 @@ export const styles = StyleSheet.create({
   rolePickChip: {
     paddingVertical: 7,
     paddingHorizontal: 14,
-    borderRadius: 8,
+    borderRadius: 10,
     backgroundColor: "#F1F5F9",
     borderColor: colors.line,
     borderWidth: 1
@@ -871,7 +917,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#CCFBF1",
     borderColor: "#99F6E4",
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
     marginBottom: 14
   },
@@ -898,7 +944,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#CCFBF1",
     borderColor: "#99F6E4",
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     marginBottom: 14
   },
@@ -914,7 +960,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#EEF2FF",
     borderColor: "#C7D2FE",
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
     paddingVertical: 6,
     paddingHorizontal: 10
   },
@@ -936,8 +982,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 5,
+    borderRadius: 10,
+    paddingVertical: 6,
     paddingHorizontal: 10
   },
   crudBadge: {
@@ -964,14 +1010,14 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.line,
     borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 12,
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 3
+    elevation: 2,
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6
   },
   crudRowMeta: {
     color: colors.muted,
