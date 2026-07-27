@@ -66,32 +66,48 @@ function App() {
 
   const currentUser = useMemo(() => {
     if (!user) return null;
-    const email = user.primaryEmailAddress?.emailAddress || "";
+    const cleanEmail = (user.primaryEmailAddress?.emailAddress || "").trim().toLowerCase();
+    const clerkRole = user.unsafeMetadata?.role || user.publicMetadata?.role;
+    const clerkStudentId = user.unsafeMetadata?.studentId;
 
-    if (email.toLowerCase().includes("anand") || email.toLowerCase().includes("admin")) {
+    // 1. Check matching student/teacher/admin record in database list
+    const matched = students.find(
+      (s) =>
+        (s.email && s.email.trim().toLowerCase() === cleanEmail) ||
+        (clerkStudentId && s.id === clerkStudentId)
+    );
+
+    if (matched) {
+      return {
+        ...matched,
+        name: customUserOverrides?.name || matched.name || user.fullName || "User",
+        email: cleanEmail || matched.email,
+        role: matched.role || clerkRole || "Student",
+        avatar: customUserOverrides?.avatar || matched.avatar || user.imageUrl
+      };
+    }
+
+    // 2. Check explicit Admin email accounts
+    if (
+      cleanEmail === "anandnimcet2020@gmail.com" ||
+      cleanEmail === "rrptdr@gmail.com" ||
+      cleanEmail === "admin@vsps.edu"
+    ) {
       return {
         id: "VSPS-ADMIN-01",
         name: customUserOverrides?.name || user.fullName || user.firstName || "Anand Admin",
-        email,
+        email: cleanEmail,
         role: "Admin",
         avatar: customUserOverrides?.avatar || user.imageUrl
       };
     }
 
-    const matched = students.find((s) => s.email?.toLowerCase() === email.toLowerCase());
-    if (matched) {
-      return {
-        ...matched,
-        name: customUserOverrides?.name || matched.name,
-        avatar: customUserOverrides?.avatar || matched.avatar
-      };
-    }
-
+    // 3. Fallback to Clerk metadata role or Student
     return {
       id: user.id,
       name: customUserOverrides?.name || user.fullName || user.firstName || "Campus User",
-      email,
-      role: "Student",
+      email: cleanEmail,
+      role: clerkRole || "Student",
       avatar: customUserOverrides?.avatar || user.imageUrl
     };
   }, [user, students, customUserOverrides]);
@@ -159,7 +175,13 @@ function App() {
     return ["Home", "Fees", "Reports", "Bus", "Profile"];
   }, [effectiveRole]);
 
-  const safeActive = tabs.includes(active) ? active : "Home";
+  const ALL_SUPPORTED_SCREENS = [
+    "Home", "Notifications", "Calendar", "News", "Attendance", "Gradebook",
+    "Homework", "Dashboard", "Timetable", "Fees", "Reports", "Messages",
+    "Bus", "Transport", "Staff", "Security", "Newsletters", "Students",
+    "IDs", "Resources", "Profile"
+  ];
+  const safeActive = ALL_SUPPORTED_SCREENS.includes(active) ? active : "Home";
 
   const handleLogout = async () => {
     try {
@@ -212,10 +234,10 @@ function App() {
           scrollEventThrottle={16}
         >
           {safeActive === "Home" && <HomeScreen role={effectiveRole} setActive={setActive} currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />}
-          {safeActive === "Notifications" && <NotificationsScreen />}
+          {safeActive === "Notifications" && <NotificationsScreen role={effectiveRole} />}
           {safeActive === "Calendar" && <CalendarScreen />}
           {safeActive === "News" && <NewsScreen />}
-          {safeActive === "Attendance" && <AttendanceScreen />}
+          {safeActive === "Attendance" && <AttendanceScreen role={effectiveRole} currentUser={currentUser} students={students} />}
           {safeActive === "Gradebook" && <GradebookScreen />}
           {safeActive === "Homework" && <HomeworkScreen role={effectiveRole} />}
           {safeActive === "Dashboard" && <DashboardScreen currentUser={currentUser} />}
@@ -225,7 +247,7 @@ function App() {
           {safeActive === "Messages" && <MessagesScreen role={effectiveRole} />}
           {safeActive === "Bus" && <BusTrackingScreen />}
           {safeActive === "Transport" && <TransportAdminScreen />}
-          {safeActive === "Staff" && <StaffDirectoryScreen />}
+          {safeActive === "Staff" && <StaffDirectoryScreen role={effectiveRole} />}
           {safeActive === "Security" && <SecurityCenterScreen />}
           {safeActive === "Newsletters" && <NewslettersScreen />}
           {safeActive === "Students" && (

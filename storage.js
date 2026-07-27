@@ -219,51 +219,72 @@ export async function saveStudentToDB(student) {
     createdAt: student.createdAt || new Date().toISOString()
   };
 
-  try {
-    const { error } = await supabase.from("students").insert([
-      {
-        id: record.id,
-        name: record.name,
-        email: record.email,
-        phone: record.phone || "",
-        class_section: record.classSection || "Class VIII A",
-        roll_no: record.rollNo || "01",
-        password: record.password || "",
-        role: record.role || "Student",
-        onboarding_code: record.onboardingCode || "VSPS-ONBOARD-2026",
-        created_at: record.createdAt
-      }
-    ]);
+  const payload = {
+    id: record.id,
+    name: record.name,
+    email: record.email.trim().toLowerCase(),
+    phone: record.phone || "",
+    class_section: record.classSection || "Class 1st",
+    roll_no: record.rollNo || "01",
+    role: record.role || "Student",
+    onboarding_code: record.onboardingCode || record.id
+  };
 
-    if (error && !error.message?.includes("duplicate")) {
-      console.warn("Supabase save warning:", error.message);
+  let supabaseError = null;
+
+  try {
+    // 1. Try Upsert by primary key (id)
+    const { error: upsertErr } = await supabase
+      .from("students")
+      .upsert([payload], { onConflict: "id" });
+
+    if (upsertErr) {
+      supabaseError = upsertErr;
+      console.warn("Supabase upsert by ID notice:", upsertErr.message);
+
+      // 2. Fallback: Try Upsert by email if email already exists
+      const { error: emailUpsertErr } = await supabase
+        .from("students")
+        .upsert([payload], { onConflict: "email" });
+
+      if (emailUpsertErr) {
+        supabaseError = emailUpsertErr;
+        console.error("Supabase upsert by email error:", emailUpsertErr.message);
+      } else {
+        supabaseError = null;
+      }
     }
   } catch (err) {
-    console.warn("Supabase save exception:", err.message);
+    supabaseError = err;
+    console.error("Supabase saveStudentToDB exception:", err.message);
   }
 
-  // Save to SQLite
+  if (supabaseError) {
+    throw new Error(supabaseError.message || "Failed to save student record to Supabase.");
+  }
+
+  // Save to SQLite local cache
   try {
     const db = await getDb();
     await db.runAsync(
-      `INSERT INTO students
+      `INSERT OR REPLACE INTO students
          (id, name, email, phone, classSection, rollNo, password, role, onboardingCode, createdAt)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         record.id,
         record.name,
-        record.email,
+        record.email.trim().toLowerCase(),
         record.phone || "",
-        record.classSection || "Class VIII A",
+        record.classSection || "Class 1st",
         record.rollNo || "01",
-        record.password || "",
+        record.password || "password123",
         record.role || "Student",
-        record.onboardingCode || "VSPS-ONBOARD-2026",
+        record.onboardingCode || record.id,
         record.createdAt
       ]
     );
   } catch (err) {
-    // If duplicated locally, update
+    console.warn("SQLite save error:", err);
   }
 
   return await loadStudentsFromDB();
@@ -284,7 +305,6 @@ export async function updateStudentInDB(student) {
         phone: student.phone || "",
         class_section: student.classSection || "",
         roll_no: student.rollNo || "",
-        password: student.password || "",
         role: student.role || "Student"
       })
       .eq("id", student.id);
@@ -577,4 +597,193 @@ export async function deleteHomeworkFromDB(hwId) {
   }
   return await loadHomeworkFromDB();
 }
+
+// ─── ATTENDANCE SUPABASE API ──────────────────────────────────────────────────
+
+export async function fetchAttendanceFromDB(date, classSection) {
+  try {
+    const { data, error } = await supabase
+      .from("attendance")
+      .select("*")
+      .eq("date", date)
+      .eq("class_section", classSection);
+
+    if (!error && data) {
+      const map = {};
+      data.forEach(item => {
+        map[item.student_id] = item.status;
+      });
+      return map;
+    }
+  } catch (err) {
+    console.warn("fetchAttendanceFromDB error:", err.message);
+  }
+  return {};
+}
+
+export async function saveAttendanceToDB(date, classSection, attendanceMap, classStudents = []) {
+  try {
+    const studentLookup = {};
+    classStudents.forEach(st => {
+      studentLookup[st.id] = st.name;
+    });
+
+    const records = Object.keys(attendanceMap).map(studentId => ({
+      student_id: studentId,
+      student_name: studentLookup[studentId] || "Student",
+      date: date,
+      class_section: classSection,
+      status: attendanceMap[studentId] || "Present"
+    }));
+
+    if (records.length > 0) {
+      // Clean up previous records for this date & class section to ensure exact 1 record per student
+      await supabase
+        .from("attendance")
+        .delete()
+        .eq("date", date)
+        .eq("class_section", classSection);
+
+      const { error } = await supabase.from("attendance").insert(records);
+      if (error) {
+        console.warn("saveAttendanceToDB insert warning:", error.message);
+      }
+    }
+    return true;
+  } catch (err) {
+    console.warn("saveAttendanceToDB exception:", err.message);
+    return false;
+  }
+}
+
+// ─── TEACHERS / STAFF SUPABASE CRUD ──────────────────────────────────────────
+
+export async function loadTeachersFromDB() {
+  try {
+    const { data, error } = await supabase
+      .from("teachers")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data && data.length > 0) {
+      return data.map(item => ({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        phone: item.phone || "",
+        subject: item.subject,
+        department: item.department || "Academics",
+        assignedClass: item.assigned_class || "Class VIII A"
+      }));
+    }
+  } catch (err) {
+    console.warn("loadTeachersFromDB warning:", err.message);
+  }
+  return [
+    { id: "t1", name: "Meera Sharma", email: "meera.sharma@vsps.edu", phone: "+91 98765 11101", subject: "Science", department: "Academics", assignedClass: "Class VIII A" },
+    { id: "t2", name: "Vikram Singh", email: "vikram.teacher@vsps.edu", phone: "+91 98765 11102", subject: "Mathematics", department: "Academics", assignedClass: "Class IX A" },
+    { id: "t3", name: "Sunita Rao", email: "sunita.teacher@vsps.edu", phone: "+91 98765 11103", subject: "English", department: "Academics", assignedClass: "Class X B" }
+  ];
+}
+
+export async function saveTeacherToDB(teacher) {
+  try {
+    await supabase.from("teachers").insert([
+      {
+        name: teacher.name,
+        email: teacher.email,
+        phone: teacher.phone || "",
+        subject: teacher.subject || "Academics",
+        department: teacher.department || "Academics",
+        assigned_class: teacher.assignedClass || "Class VIII A"
+      }
+    ]);
+  } catch (err) {
+    console.warn("saveTeacherToDB warning:", err.message);
+  }
+  return await loadTeachersFromDB();
+}
+
+export async function updateTeacherInDB(teacher) {
+  try {
+    await supabase
+      .from("teachers")
+      .update({
+        name: teacher.name,
+        email: teacher.email,
+        phone: teacher.phone || "",
+        subject: teacher.subject || "Academics",
+        department: teacher.department || "Academics",
+        assigned_class: teacher.assignedClass || "Class VIII A"
+      })
+      .eq("id", teacher.id);
+  } catch (err) {
+    console.warn("updateTeacherInDB warning:", err.message);
+  }
+  return await loadTeachersFromDB();
+}
+
+export async function deleteTeacherFromDB(teacherId) {
+  try {
+    await supabase.from("teachers").delete().eq("id", teacherId);
+  } catch (err) {
+    console.warn("deleteTeacherFromDB warning:", err.message);
+  }
+  return await loadTeachersFromDB();
+}
+
+// ─── NOTIFICATIONS SUPABASE CRUD ──────────────────────────────────────────────
+
+export async function loadNotificationsFromDB() {
+  try {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data && data.length > 0) {
+      return data.map(item => ({
+        id: item.id,
+        type: item.type || "Announcement",
+        title: item.title,
+        body: item.body,
+        color: item.color || "#4F46E5"
+      }));
+    }
+  } catch (err) {
+    console.warn("loadNotificationsFromDB warning:", err.message);
+  }
+  return [
+    { id: "n1", type: "Emergency", title: "Heavy rain advisory", body: "School buses may be delayed by 15 minutes today.", color: "#F43F5E" },
+    { id: "n2", type: "Announcement", title: "Science exhibition", body: "Parents are invited on Friday from 10:00 AM.", color: "#4F46E5" },
+    { id: "n3", type: "Reminder", title: "Fee due date", body: "Quarterly tuition payment closes on 18 July.", color: "#F59E0B" }
+  ];
+}
+
+export async function saveNotificationToDB(notification) {
+  try {
+    await supabase.from("notifications").insert([
+      {
+        type: notification.type || "Announcement",
+        title: notification.title,
+        body: notification.body,
+        color: notification.color || "#4F46E5"
+      }
+    ]);
+  } catch (err) {
+    console.warn("saveNotificationToDB warning:", err.message);
+  }
+  return await loadNotificationsFromDB();
+}
+
+export async function deleteNotificationFromDB(notificationId) {
+  try {
+    await supabase.from("notifications").delete().eq("id", notificationId);
+  } catch (err) {
+    console.warn("deleteNotificationFromDB warning:", err.message);
+  }
+  return await loadNotificationsFromDB();
+}
+
+
 
